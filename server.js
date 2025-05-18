@@ -24,6 +24,15 @@ app.post('/submit', async (req, res) => {
     }
 });
 
+app.get('/', async (req, res) => {
+  try {
+    res.render('pages/home');
+  }
+  catch (error) {
+    res.status(500);
+  }
+});
+
 app.get('/users', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM users');
