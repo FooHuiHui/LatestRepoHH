@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Expiry Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Food Expiry Tracker</h1>
+    <div>
+        <label>User Email:</label>
+        <input type="email" id="email" placeholder="Enter email">
+    </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" id="password" placeholder="Enter password">
+    </div>
+    <button onclick="login()">Login</button>
+    
+    <h2>Add Food Item</h2>
+    <input type="text" id="food_name" placeholder="Food Name">
+    <input type="number" id="quantity" placeholder="Quantity">
+    <input type="date" id="expiry_date">
+    <input type="number" id="reminder_days" placeholder="Days before expiry to remind">
+    <button onclick="addFood()">Add Food</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
