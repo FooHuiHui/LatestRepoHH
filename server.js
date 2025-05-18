@@ -1,168 +1,119 @@
-const express = require('express');
-const { Pool } = require('pg');
-const bodyParser = require('body-parser');
+// Needed for dotenv
+require("dotenv").config();
 
-const app = express();
-const pool = new Pool({
-    user: 'your_username',
-    host: 'localhost',
-    database: 'your_database',
-    password: 'your_password',
-    port: 5432
-});
+// Needed for Express
+var express = require('express')
+var app = express()
 
-app.use(bodyParser.json());
-app.use(express.static('public'));
+// add this snippet after "var express = require('express')"
+var axios = require('axios');
 
 // Needed for EJS
 app.set('view engine', 'ejs');
 
-app.post('/submit', async (req, res) => {
-    const { name, age, birthdate } = req.body;
+// Needed for public directory
+app.use(express.static(__dirname + '/public'));
+
+// Needed for parsing form data
+app.use(express.json());       
+app.use(express.urlencoded({extended: true}));
+
+// Needed for Prisma to connect to database
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient();
+
+// Main landing page
+app.get('/', async function(req, res) {
+
+    // Try-Catch for any errors
     try {
-        await pool.query('INSERT INTO users (name, age, birthdate) VALUES ($1, $2, $3)', [name, age, birthdate]);
-        res.json({ message: 'User data saved successfully!' });
-    } catch (error) {
-        res.status(500).json({ error: 'Error saving data' });
-    }
+        // Get all blog posts
+        const blogs = await prisma.post.findMany({
+                orderBy: [
+                  {
+                   id: 'desc'
+                  }
+                ]
+        });
+
+        // Render the homepage with all the blog posts
+        await res.render('pages/home', { blogs: blogs });
+      } catch (error) {
+        res.render('pages/home');
+        console.log(error);
+      } 
 });
 
-app.get('/', async (req, res) => {
-  try {
-    res.render('pages/home');
-  }
-  catch (error) {
-    res.status(500);
-  }
+// About page
+app.get('/about', function(req, res) {
+   res.render('pages/about');
 });
 
-app.get('/users', async (req, res) => {
+// New post page
+app.get('/new', function(req, res) {
+   res.render('pages/new');
+});
+
+// Create a new post
+app.post('/new', async function(req, res) {
+    
+    // Try-Catch for any errors
     try {
-        const result = await pool.query('SELECT * FROM users');
-        res.json(result.rows);
-    } catch (error) {
-        res.status(500).json({ error: 'Error fetching data' });
-    }
+        // Get the title and content from submitted form
+        const { title, content } = req.body;
+
+        // Reload page if empty title or content
+        if (!title || !content) {
+           console.log("Unable to create new post, no title or content");
+           res.render('pages/new');
+        } else {
+            // Create post and store in database
+            const blog = await prisma.post.create({
+               data: { title, content },
+            });
+
+            // Redirect back to the homepage
+            res.redirect('/');
+        }
+      } catch (error) {
+        console.log(error);
+        res.render('pages/new');
+      }
+
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
-
-//// Needed for dotenv
-//require("dotenv").config();
-
-//// Needed for Express
-//var express = require('express')
-//var app = express()
-
-//// add this snippet after "var express = require('express')"
-//var axios = require('axios');
-
-//// Needed for EJS
-//app.set('view engine', 'ejs');
-
-//// Needed for public directory
-//app.use(express.static(__dirname + '/public'));
-
-//// Needed for parsing form data
-//app.use(express.json());       
-//app.use(express.urlencoded({extended: true}));
-
-//// Needed for Prisma to connect to database
-//const { PrismaClient } = require('@prisma/client')
-//const prisma = new PrismaClient();
-
-//// Main landing page
-//app.get('/', async function(req, res) {
-
-    //// Try-Catch for any errors
-    //try {
-        //// Get all blog posts
-        //const blogs = await prisma.post.findMany({
-                //orderBy: [
-                  //{
-                  //  id: 'desc'
-                  //}
-                //]
-        //});
-
-        //// Render the homepage with all the blog posts
-        //await res.render('pages/home', { blogs: blogs });
-      //} catch (error) {
-        //res.render('pages/home');
-        //console.log(error);
-      //} 
-//});
-
-//// About page
-//app.get('/about', function(req, res) {
-  //  res.render('pages/about');
-//});
-
-//// New post page
-//app.get('/new', function(req, res) {
-  //  res.render('pages/new');
-//});
-
-//// Create a new post
-//app.post('/new', async function(req, res) {
+// Delete a post by id
+app.post("/delete/:id", async (req, res) => {
+   const { id } = req.params;
     
-    //// Try-Catch for any errors
-    //try {
-        //// Get the title and content from submitted form
-        //const { title, content } = req.body;
-
-        //// Reload page if empty title or content
-        //if (!title || !content) {
-          //  console.log("Unable to create new post, no title or content");
-          //  res.render('pages/new');
-        //} else {
-            //// Create post and store in database
-            //const blog = await prisma.post.create({
-              //  data: { title, content },
-            //});
-
-            //// Redirect back to the homepage
-            //res.redirect('/');
-        //}
-      //} catch (error) {
-        //console.log(error);
-        //res.render('pages/new');
-      //}
-
-//});
-
-//// Delete a post by id
-//app.post("/delete/:id", async (req, res) => {
-  //  const { id } = req.params;
-    
-    //try {
-      //  await prisma.post.delete({
-        //    where: { id: parseInt(id) },
-        //});
+    try {
+       await prisma.post.delete({
+           where: { id: parseInt(id) },
+        });
       
-        //// Redirect back to the homepage
-      //  res.redirect('/');
-    //} catch (error) {
-      //  console.log(error);
-      //  res.redirect('/');
-    //}
-  //});
+        // Redirect back to the homepage
+       res.redirect('/');
+    } catch (error) {
+       console.log(error);
+       res.redirect('/');
+    }
+  });
 
-//// Tells the app which port to run on
-//app.listen(8080);
+// Tells the app which port to run on
+app.listen(8080);
 
-//app.get('/demo', function(req, res) {
-  //res.render('pages/demo');
-//});
+app.get('/demo', function(req, res) {
+  res.render('pages/demo');
+});
 
-//// add this snippet before 
-//app.get('/weather', async (req, res) => {
-  //  try {
-    //  const response = await axios.get('https://api-open.data.gov.sg/v2/real-time/api/twenty-four-hr-forecast');
-    //  res.render('pages/weather', { weather: response.data });
-    //} catch (error) {
-    //  console.error(error);
-    //  res.send('Error fetching weather data');
-    //}
-  //});
+// add this snippet before 
+app.get('/weather', async (req, res) => {
+   try {
+     const response = await axios.get('https://api-open.data.gov.sg/v2/real-time/api/twenty-four-hr-forecast');
+     res.render('pages/weather', { weather: response.data });
+    } catch (error) {
+     console.error(error);
+     res.send('Error fetching weather data');
+    }
+  });
   
