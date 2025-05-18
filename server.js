@@ -26,7 +26,7 @@ app.post('/submit', async (req, res) => {
 
 app.get('/', async (req, res) => {
   try {
-    res.render('pages/home');
+    res.render('index.html');
   }
   catch (error) {
     res.status(500);
