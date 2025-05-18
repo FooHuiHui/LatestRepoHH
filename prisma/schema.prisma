@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,9 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Post model represents individual blog posts
 model Post {
-  id        Int       @id @default(autoincrement())
-  title     String
-  content   String
+  id      Int    @id @default(autoincrement())
+  title   String
+  content String
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model FoodItem {
+  id                Int      @id @default(autoincrement())
+  user_id           Int?
+  food_name         String   @db.VarChar(255)
+  quantity          Int
+  expiry_date       DateTime @db.Date
+  consumed_quantity Int?     @default(0)
+  reminder_days     Int?     @default(3)
+  users             User?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  name       String?      @db.VarChar(100)
+  age        Int?
+  birthdate  DateTime?    @db.Date
+  food_items FoodItem[]
+
+  @@map("users")
 }
