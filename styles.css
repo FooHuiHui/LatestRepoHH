@@ -1,0 +1,11 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+form {
+    display: inline-block;
+    text-align: left;
+}
+input, button {
+    margin: 5px;
+}

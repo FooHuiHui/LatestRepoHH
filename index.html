@@ -3,28 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Expiry Tracker</title>
+    <title>User Input</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Food Expiry Tracker</h1>
-    <div>
-        <label>User Email:</label>
-        <input type="email" id="email" placeholder="Enter email">
-    </div>
-    <div>
-        <label>Password:</label>
-        <input type="password" id="password" placeholder="Enter password">
-    </div>
-    <button onclick="login()">Login</button>
-    
-    <h2>Add Food Item</h2>
-    <input type="text" id="food_name" placeholder="Food Name">
-    <input type="number" id="quantity" placeholder="Quantity">
-    <input type="date" id="expiry_date">
-    <input type="number" id="reminder_days" placeholder="Days before expiry to remind">
-    <button onclick="addFood()">Add Food</button>
+    <h2>Enter Your Details</h2>
+    <form id="userForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br>
 
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required><br>
+
+        <label for="birthdate">Birthdate:</label>
+        <input type="date" id="birthdate" name="birthdate" required><br>
+
+        <button type="submit">Submit</button>
+    </form>
     <script src="script.js"></script>
 </body>
 </html>
