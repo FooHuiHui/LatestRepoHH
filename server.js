@@ -14,6 +14,9 @@ const pool = new Pool({
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
+// Needed for EJS
+app.set('view engine', 'ejs');
+
 app.post('/submit', async (req, res) => {
     const { name, age, birthdate } = req.body;
     try {
@@ -26,7 +29,7 @@ app.post('/submit', async (req, res) => {
 
 app.get('/', async (req, res) => {
   try {
-    res.render('pages/demo');
+    res.render('pages/home');
   }
   catch (error) {
     res.status(500);
