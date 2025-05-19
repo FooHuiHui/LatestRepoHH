@@ -28,10 +28,11 @@ app.post('/consume-item', async (req, res) => {
 app.get('/expiring/:days', async (req, res) => {
   const { days } = req.params;
   const result = await db.query(
-    'SELECT * FROM items WHERE expiry <= NOW() + ($1 || ' days')::interval',
+    "SELECT * FROM items WHERE expiry <= NOW() + ($1 || ' days')::interval",
     [days]
   );
   res.json(result.rows);
 });
+
 
 app.listen(3000, () => console.log('Server running on port 3000'));
