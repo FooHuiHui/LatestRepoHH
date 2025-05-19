@@ -1,4 +1,4 @@
-const api = 'https://your-backend.onrender.com'; // Replace with your Render backend URL
+const api = 'https://latestrepohh.onrender.com'; // Replace with your Render backend URL
 
 async function addItem() {
   const name = document.getElementById('itemName').value;
