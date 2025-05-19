@@ -1,119 +1,37 @@
-// Needed for dotenv
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+const db = require('./db');
 
-// Needed for Express
-var express = require('express')
-var app = express()
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
 
-// add this snippet after "var express = require('express')"
-var axios = require('axios');
-
-// Needed for EJS
-app.set('view engine', 'ejs');
-
-// Needed for public directory
-app.use(express.static(__dirname + '/public'));
-
-// Needed for parsing form data
-app.use(express.json());       
-app.use(express.urlencoded({extended: true}));
-
-// Needed for Prisma to connect to database
-const { PrismaClient } = require('@prisma/client')
-const prisma = new PrismaClient();
-
-// Main landing page
-app.get('/', async function(req, res) {
-
-    // Try-Catch for any errors
-    try {
-        // Get all blog posts
-        const blogs = await prisma.post.findMany({
-                orderBy: [
-                  {
-                   id: 'desc'
-                  }
-                ]
-        });
-
-        // Render the homepage with all the blog posts
-        await res.render('pages/home', { blogs: blogs });
-      } catch (error) {
-        res.render('pages/home');
-        console.log(error);
-      } 
+app.post('/add-item', async (req, res) => {
+  const { name, quantity, expiry } = req.body;
+  await db.query(
+    'INSERT INTO items (name, quantity, expiry, consumed) VALUES ($1, $2, $3, 0)',
+    [name, quantity, expiry]
+  );
+  res.sendStatus(200);
 });
 
-// About page
-app.get('/about', function(req, res) {
-   res.render('pages/about');
+app.post('/consume-item', async (req, res) => {
+  const { name, quantity } = req.body;
+  await db.query(
+    'UPDATE items SET quantity = quantity - $1, consumed = consumed + $1 WHERE name = $2',
+    [quantity, name]
+  );
+  res.sendStatus(200);
 });
 
-// New post page
-app.get('/new', function(req, res) {
-   res.render('pages/new');
+app.get('/expiring/:days', async (req, res) => {
+  const { days } = req.params;
+  const result = await db.query(
+    'SELECT * FROM items WHERE expiry <= NOW() + ($1 || ' days')::interval',
+    [days]
+  );
+  res.json(result.rows);
 });
 
-// Create a new post
-app.post('/new', async function(req, res) {
-    
-    // Try-Catch for any errors
-    try {
-        // Get the title and content from submitted form
-        const { title, content } = req.body;
-
-        // Reload page if empty title or content
-        if (!title || !content) {
-           console.log("Unable to create new post, no title or content");
-           res.render('pages/new');
-        } else {
-            // Create post and store in database
-            const blog = await prisma.post.create({
-               data: { title, content },
-            });
-
-            // Redirect back to the homepage
-            res.redirect('/');
-        }
-      } catch (error) {
-        console.log(error);
-        res.render('pages/new');
-      }
-
-});
-
-// Delete a post by id
-app.post("/delete/:id", async (req, res) => {
-   const { id } = req.params;
-    
-    try {
-       await prisma.post.delete({
-           where: { id: parseInt(id) },
-        });
-      
-        // Redirect back to the homepage
-       res.redirect('/');
-    } catch (error) {
-       console.log(error);
-       res.redirect('/');
-    }
-  });
-
-// Tells the app which port to run on
-app.listen(8080);
-
-app.get('/demo', function(req, res) {
-  res.render('pages/demo');
-});
-
-// add this snippet before 
-app.get('/weather', async (req, res) => {
-   try {
-     const response = await axios.get('https://api-open.data.gov.sg/v2/real-time/api/twenty-four-hr-forecast');
-     res.render('pages/weather', { weather: response.data });
-    } catch (error) {
-     console.error(error);
-     res.send('Error fetching weather data');
-    }
-  });
-  
+app.listen(3000, () => console.log('Server running on port 3000'));
