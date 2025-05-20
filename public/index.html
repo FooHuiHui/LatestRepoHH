@@ -7,6 +7,49 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <nav>
+    <button onclick="showSection('add')">Add</button>
+    <button onclick="showSection('kitchen')">Kitchen</button>
+    <button onclick="showSection('consumed')">Consumed</button>
+    <button onclick="showSection('expiring')">Expiring</button>
+  </nav>
+
+  <section id="add" class="tab">
+    <h2>Add Item</h2>
+    <input id="itemName" placeholder="Item name" />
+    <input id="quantity" type="number" placeholder="Quantity" />
+    <input id="expiry" type="date" />
+    <button onclick="addItem()">Add</button>
+  </section>
+
+  <section id="kitchen" class="tab" style="display:none;">
+    <h2>Items in Kitchen</h2>
+    <ul id="kitchenList"></ul>
+  </section>
+
+  <section id="consumed" class="tab" style="display:none;">
+    <h2>Items Consumed</h2>
+    <ul id="consumedList"></ul>
+  </section>
+
+  <section id="expiring" class="tab" style="display:none;">
+    <h2>Items Expiring Soon</h2>
+    <input id="daysToExpire" type="number" placeholder="Days" />
+    <button onclick="checkExpiring()">Check</button>
+    <ul id="expiringList"></ul>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+<!-- <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kitchen Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
   <h1>Kitchen Food Tracker</h1>
 
   <section>
@@ -43,4 +86,4 @@
 
   <script src="script.js"></script>
 </body>
-</html>
+</html> -->

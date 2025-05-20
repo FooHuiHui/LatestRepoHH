@@ -1,5 +1,41 @@
 body {
   font-family: sans-serif;
+  background-color: #f9f9f9;
+  padding: 20px;
+}
+
+nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+nav button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+section {
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+input {
+  margin: 5px;
+  padding: 5px;
+}
+
+button {
+  padding: 6px 12px;
+  margin-top: 10px;
+}
+
+/* body {
+  font-family: sans-serif;
   padding: 20px;
   background-color: #f9f9f9;
 }
@@ -13,3 +49,4 @@ section {
 input {
   margin: 5px;
 }
+*/
