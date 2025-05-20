@@ -8,9 +8,9 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.post('/add-item', async (req, res) => {
-  const { name, quantity, expiry } = req.body;
+  let { name, quantity, expiry } = req.body;
   await db.query(
-    'INSERT INTO items (name, quantity, expiry, consumed) VALUES ($1, $2, $3, 0)',
+    'INSERT INTO "Items" (name, quantity, expiry, consumed) VALUES ($1, $2, $3, 0)',
     [name, quantity, expiry]
   );
   res.sendStatus(200);
@@ -19,7 +19,7 @@ app.post('/add-item', async (req, res) => {
 app.post('/consume-item', async (req, res) => {
   const { name, quantity } = req.body;
   await db.query(
-    'UPDATE items SET quantity = quantity - $1, consumed = consumed + $1 WHERE name = $2',
+    'UPDATE "Items" SET quantity = quantity - $1, consumed = consumed + $1 WHERE name = $2',
     [quantity, name]
   );
   res.sendStatus(200);
@@ -28,7 +28,7 @@ app.post('/consume-item', async (req, res) => {
 app.get('/expiring/:days', async (req, res) => {
   const { days } = req.params;
   const result = await db.query(
-    "SELECT * FROM items WHERE expiry <= NOW() + ($1 || ' days')::interval",
+    "SELECT * FROM "Items" WHERE expiry <= NOW() + ($1 || ' days')::interval",
     [days]
   );
   res.json(result.rows);

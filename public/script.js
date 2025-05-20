@@ -1,10 +1,11 @@
-const api = 'https://latestrepohh.onrender.com'; // Replace with your Render backend URL
 
 async function addItem() {
   const name = document.getElementById('itemName').value;
   const quantity = document.getElementById('quantity').value;
   const expiry = document.getElementById('expiry').value;
-  await fetch(`${api}/add-item`, {
+  
+
+  await fetch(`./add-item`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ name, quantity, expiry })
@@ -15,7 +16,7 @@ async function addItem() {
 async function consumeItem() {
   const name = document.getElementById('consumeName').value;
   const quantity = document.getElementById('consumeQuantity').value;
-  await fetch(`${api}/consume-item`, {
+  await fetch(`./consume-item`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ name, quantity })
