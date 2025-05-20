@@ -34,6 +34,7 @@ button {
   margin-top: 10px;
 }
 
+/*
 table {
   width: 100%;
   border-collapse: collapse;
@@ -45,10 +46,28 @@ th, td {
   border: 1px solid #ddd;
   text-align: left;
 }
+*/
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
 
 th {
   background-color: #f0f0f0;
 }
+
+input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
 
 /* body {
   font-family: sans-serif;

@@ -16,12 +16,28 @@ app.post('/add-item', async (req, res) => {
   res.sendStatus(200);
 });
 
+/*
 app.get('/Items', async (req, res) => {
-  const result = await db.query(
-    `SELECT * FROM "Items"`,
-  );
+  const result = await db.query(`SELECT * FROM "Items"`,);
   res.json(result.rows);
 });
+
+app.get('/items', async (req, res) => {
+  const result = await db.query('SELECT * FROM items');
+  res.json(result.rows);
+});
+*/
+
+app.get('/items', async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM "Items"');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error in GET /items:', err);
+    res.status(500).send('Database error');
+  }
+});
+
 
 app.post('/consume-item', async (req, res) => {
   const { name, quantity } = req.body;
@@ -41,5 +57,16 @@ app.get('/expiring/:days', async (req, res) => {
   res.json(result.rows);
 });
 
+app.post('/return-item', async (req, res) => {
+  const { name, quantity } = req.body;
+  if (!name || !quantity) return res.status(400).send('Missing data');
+
+  await db.query(
+    'UPDATE "Items" SET quantity = quantity + $1, consumed = consumed - $1 WHERE name = $2 AND consumed >= $1',
+    [quantity, name]
+  );
+
+  res.status(200).send('Returned');
+});
 
 app.listen(3000, () => console.log('Server running on port 3000'));
