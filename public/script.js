@@ -1,9 +1,17 @@
-function showSection(id) {
-  document.querySelectorAll('.tab').forEach(tab => tab.style.display = 'none');
-  document.getElementById(id).style.display = 'block';
+function showSection(sectionId) {
+  // Hide all tabs
+  document.querySelectorAll('.tab').forEach(section => {
+    section.style.display = 'none';
+  });
 
-  if (id === 'kitchen') loadKitchen();
-  if (id === 'consumed') loadConsumed();
+  // Show selected tab
+  const section = document.getElementById(sectionId);
+  section.style.display = 'block';
+
+  // Call relevant loader
+  if (sectionId === 'kitchen') loadKitchen();
+  else if (sectionId === 'consumed') loadConsumed();
+  else if (sectionId === 'expiring') checkExpiring();
 }
 
 async function addItem() {
@@ -21,33 +29,70 @@ async function addItem() {
 }
 
 async function loadKitchen() {
-  const res = await fetch(`./items`);
-  const items = await res.json();
+  const res = await fetch(`./Items`);
+  const food = await res.json();
   const list = document.getElementById('kitchenList');
   list.innerHTML = '';
-  items.filter(i => i.quantity > 0).forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = `${item.name} - ${item.quantity} (expires: ${item.expiry})`;
-    const btn = document.createElement('button');
-    btn.textContent = 'Consume';
-    btn.onclick = async () => {
-      const qty = prompt(`How much to consume from "${item.name}"?`);
+  
+  const activeItems = food.filter(i => i.quantity > 0);
+  if (activeItems.length === 0) {
+    list.innerHTML = '<li>No items currently in kitchen.</li>';
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.innerHTML = `
+    <tr>
+      <th>Item</th>
+      <th>Quantity Left</th>
+      <th>Expiry Date</th>
+      <th>Consumed?</th>
+    </tr>
+  `;
+
+  activeItems.forEach(item => {
+    const row = document.createElement('tr');
+
+    const nameCell = document.createElement('td');
+    nameCell.textContent = item.name;
+
+    const qtyCell = document.createElement('td');
+    qtyCell.textContent = item.quantity;
+
+    const expiryCell = document.createElement('td');
+    expiryCell.textContent = item.expiry;
+
+    const checkboxCell = document.createElement('td');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.onclick = async () => {
+      const qty = prompt(`How much of "${item.name}" do you want to consume?`, 1);
       if (qty && parseInt(qty) > 0) {
         await fetch(`./consume-item`, {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
         });
-        loadKitchen();
+        loadKitchen(); // Refresh after update
+      } else {
+        checkbox.checked = false; // Uncheck if invalid input
       }
     };
-    li.appendChild(btn);
-    list.appendChild(li);
+    checkboxCell.appendChild(checkbox);
+
+    row.appendChild(nameCell);
+    row.appendChild(qtyCell);
+    row.appendChild(expiryCell);
+    row.appendChild(checkboxCell);
+    table.appendChild(row);
   });
+
+  list.appendChild(table);
 }
 
+
 async function loadConsumed() {
-  const res = await fetch(`./items`);
+  const res = await fetch(`./Items`);
   const items = await res.json();
   const list = document.getElementById('consumedList');
   list.innerHTML = '';
@@ -57,21 +102,6 @@ async function loadConsumed() {
     list.appendChild(li);
   });
 }
-
-/*
-async function checkExpiring() {
-  const days = document.getElementById('daysToExpire').value;
-  const res = await fetch(`./expiring/${days}`);
-  const data = await res.json();
-  const list = document.getElementById('expiringList');
-  list.innerHTML = '';
-  data.forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = `${item.name} expires on ${item.expiry}`;
-    list.appendChild(li);
-  });
-}
-*/
 
 async function checkExpiring() {
   const days = document.getElementById('daysToExpire').value;
@@ -137,68 +167,6 @@ async function checkExpiring() {
   list.appendChild(table);
 }
 
-
-/*
-async function checkExpiring() {
-  const days = document.getElementById('daysToExpire').value;
-  const res = await fetch(`./expiring/${days}`);
-  const data = await res.json();
-
-  const list = document.getElementById('expiringList');
-  list.innerHTML = '';
-
-  if (data.length === 0) {
-    list.innerHTML = '<li>No items expiring soon.</li>';
-    return;
-  }
-
-  const table = document.createElement('table');
-  table.innerHTML = `
-    <tr>
-      <th>Item</th>
-      <th>Quantity Left</th>
-      <th>Expiry Date</th>
-      <th>Action</th>
-    </tr>
-  `;
-
-  data.forEach(item => {
-    const row = document.createElement('tr');
-
-    const nameCell = document.createElement('td');
-    nameCell.textContent = item.name;
-
-    const qtyCell = document.createElement('td');
-    qtyCell.textContent = item.quantity;
-
-    const expiryCell = document.createElement('td');
-    expiryCell.textContent = item.expiry;
-
-    const actionCell = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.textContent = 'Consume';
-    btn.onclick = async () => {
-      const qty = prompt(`How much of "${item.name}" do you want to consume?`, 1);
-      if (qty && parseInt(qty) > 0) {
-        await fetch(`./consume-item`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
-        });
-        checkExpiring(); // reload list
-      }
-    };
-    actionCell.appendChild(btn);
-
-    row.appendChild(nameCell);
-    row.appendChild(qtyCell);
-    row.appendChild(expiryCell);
-    row.appendChild(actionCell);
-    table.appendChild(row);
-  });
-
-  list.appendChild(table);
-*/
 /*
 async function consumeItem() {
   const name = document.getElementById('consumeName').value;

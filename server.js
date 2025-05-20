@@ -16,6 +16,13 @@ app.post('/add-item', async (req, res) => {
   res.sendStatus(200);
 });
 
+app.get('/Items', async (req, res) => {
+  const result = await db.query(
+    `SELECT * FROM "Items"`,
+  );
+  res.json(result.rows);
+});
+
 app.post('/consume-item', async (req, res) => {
   const { name, quantity } = req.body;
   await db.query(
