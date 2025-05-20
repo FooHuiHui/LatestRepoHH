@@ -34,6 +34,22 @@ button {
   margin-top: 10px;
 }
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+
 /* body {
   font-family: sans-serif;
   padding: 20px;

@@ -58,6 +58,66 @@ async function loadConsumed() {
   });
 }
 
+async function checkExpiring() {
+  const days = document.getElementById('daysToExpire').value;
+  const res = await fetch(`./expiring/${days}`);
+  const data = await res.json();
+
+  const list = document.getElementById('expiringList');
+  list.innerHTML = '';
+
+  if (data.length === 0) {
+    list.innerHTML = '<li>No items expiring soon.</li>';
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.innerHTML = `
+    <tr>
+      <th>Item</th>
+      <th>Quantity Left</th>
+      <th>Expiry Date</th>
+      <th>Action</th>
+    </tr>
+  `;
+
+  data.forEach(item => {
+    const row = document.createElement('tr');
+
+    const nameCell = document.createElement('td');
+    nameCell.textContent = item.name;
+
+    const qtyCell = document.createElement('td');
+    qtyCell.textContent = item.quantity;
+
+    const expiryCell = document.createElement('td');
+    expiryCell.textContent = item.expiry;
+
+    const actionCell = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.textContent = 'Consume';
+    btn.onclick = async () => {
+      const qty = prompt(`How much of "${item.name}" do you want to consume?`, 1);
+      if (qty && parseInt(qty) > 0) {
+        await fetch(`./consume-item`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
+        });
+        checkExpiring(); // reload list
+      }
+    };
+    actionCell.appendChild(btn);
+
+    row.appendChild(nameCell);
+    row.appendChild(qtyCell);
+    row.appendChild(expiryCell);
+    row.appendChild(actionCell);
+    table.appendChild(row);
+  });
+
+  list.appendChild(table);
+
 /*
 async function consumeItem() {
   const name = document.getElementById('consumeName').value;
@@ -71,7 +131,7 @@ async function consumeItem() {
 }
 */
 
-async function checkExpiring() {
+/* async function checkExpiring() {
   const days = document.getElementById('daysToExpire').value;
   const res = await fetch(`./expiring/${days}`);
   const data = await res.json();
@@ -82,4 +142,4 @@ async function checkExpiring() {
     li.textContent = `${item.name} expires on ${item.expiry}`;
     list.appendChild(li);
   });
-}
+} */
