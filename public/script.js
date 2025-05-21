@@ -19,13 +19,35 @@ async function addItem() {
   const quantity = document.getElementById('quantity').value;
   const expiry = document.getElementById('expiry').value;
   
+  /*
+  if (!name || !quantity || !expiry) {
+    alert("Please fill out all fields.");
+    return;
+  }
+*/
 
   await fetch(`./add-item`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ name, quantity, expiry })
   });
+
+  // if (res.ok) {
+    // Add the item to the screen
+    const kitchenList = document.getElementById('kitchenList');
+    const div = document.createElement('div');
+    div.textContent = `✅ ${name} - ${quantity}`;
+    kitchenList.prepend(div); 
+
+    // Reset fields
+    document.getElementById('itemName').value = '';
+    document.getElementById('quantity').value = '';
+    document.getElementById('expiry').value = '';
+
   alert('Item added!');
+  /*} else {
+    alert("Failed to add item.");
+  } */
 }
 
 async function loadKitchen() {

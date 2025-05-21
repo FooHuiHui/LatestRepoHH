@@ -16,18 +16,6 @@ app.post('/add-item', async (req, res) => {
   res.sendStatus(200);
 });
 
-/*
-app.get('/Items', async (req, res) => {
-  const result = await db.query(`SELECT * FROM "Items"`,);
-  res.json(result.rows);
-});
-
-app.get('/items', async (req, res) => {
-  const result = await db.query('SELECT * FROM items');
-  res.json(result.rows);
-});
-*/
-
 app.get('/items', async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM "Items"');
