@@ -22,7 +22,7 @@ body {
 }
 
 .navbar button {
-  background: #34495e;
+  background: #49698a;
   color: white;
   border: none;
   padding: 0.7rem 1.2rem;
@@ -37,13 +37,23 @@ body {
 }
 
 /* Sections */
+/*section {
+  padding: 10px;
+  background: purple;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+*/
+
 .tab {
   background: white;
   padding: 1rem;
   margin-top: 1rem;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+} 
+
 /*
 input[type="text"],
 input[type="number"],
@@ -89,7 +99,7 @@ button {
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+/* @media (max-width: 600px) {
   .navbar {
     flex-direction: column;
     align-items: center;
@@ -99,7 +109,7 @@ button {
     font-size: 0.9rem;
   }
 }
-
+*/
 /*
 body {
   font-family: sans-serif;
@@ -117,14 +127,6 @@ nav button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
-}
-
-section {
-  padding: 10px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
 }
 
 input {
