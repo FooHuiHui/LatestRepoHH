@@ -22,6 +22,7 @@
       <label for="itemName">Food item to be added</label>
       <input id="itemName" placeholder="Food Item name" />
       <input id="quantity" type="number" placeholder="Quantity" />
+      <br />
       <label for="expiry">Expiry Date</label>
       <input id="expiry" type="date" />
       <button onclick="addItem()">Add</button>
@@ -39,6 +40,7 @@
 
     <section id="expiring" class="tab" style="display:none;">
       <h2>Items Expiring Soon</h2>
+      <label for="daysToExpire">Check items expiring in</label>
       <input id="daysToExpire" type="number" placeholder="Days" />
       <button onclick="checkExpiring()">Check</button>
       <ul id="expiringList"></ul>
