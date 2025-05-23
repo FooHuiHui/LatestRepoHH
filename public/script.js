@@ -43,7 +43,7 @@ async function addItem() {
 
 }
 
-async function loadKitchen() {
+async function loadKitchen(sortBy = 'name') {
   const res = await fetch(`./Items`);
   const food = await res.json();
   const list = document.getElementById('kitchenList');
@@ -54,6 +54,27 @@ async function loadKitchen() {
     list.innerHTML = '<li>No items currently in kitchen.</li>';
     return;
   }
+  
+  // Sort items
+  activeItems.sort((a, b) => {
+    if (sortBy === 'expiry') {
+      return new Date(a.expiry) - new Date(b.expiry);
+    } else {
+      return a.name.localeCompare(b.name);
+    }
+  });
+
+  // Add sort buttons
+  const sortDiv = document.createElement('div');
+  sortDiv.style.marginBottom = '10px';
+  sortDiv.innerHTML = `
+    <button id="sortByName">Sort by Name</button>
+    <button id="sortByExpiry">Sort by Expiry Date</button>
+  `;
+  list.appendChild(sortDiv);
+
+  document.getElementById('sortByName').onclick = () => loadKitchen('name');
+  document.getElementById('sortByExpiry').onclick = () => loadKitchen('expiry');
 
   const table = document.createElement('table');
   table.innerHTML = `
@@ -88,7 +109,7 @@ async function loadKitchen() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
         });
-        loadKitchen(); // Refresh after update
+        loadKitchen(sortBy); // Refresh after update
       }
     };
     buttonCell.appendChild(button);
@@ -103,7 +124,7 @@ async function loadKitchen() {
   list.appendChild(table);
 }
 
-function loadConsumed() {
+function loadConsumed(sortBy = 'name') {
   const consumedList = document.getElementById('consumedList');
   consumedList.innerHTML = 'Loading...';
 
@@ -117,6 +138,27 @@ function loadConsumed() {
         consumedList.textContent = 'No items consumed yet.';
         return;
       }
+
+      // Add sort buttons
+      const sortDiv = document.createElement('div');
+      sortDiv.style.marginBottom = '10px';
+      sortDiv.innerHTML = `
+        <button id="sortConsumedByName">Sort by Name</button>
+        <button id="sortConsumedByExpiry">Sort by Expiry Date</button>
+      `;
+      consumedList.appendChild(sortDiv);
+
+      document.getElementById('sortConsumedByName').onclick = () => loadConsumed('name');
+      document.getElementById('sortConsumedByExpiry').onclick = () => loadConsumed('expiry');
+
+      // Sort items
+      consumedItems.sort((a, b) => {
+        if (sortBy === 'expiry') {
+          return new Date(a.expiry) - new Date(b.expiry);
+        } else {
+          return a.name.localeCompare(b.name);
+        }
+      });
 
       const table = document.createElement('table');
       table.innerHTML = `
@@ -153,7 +195,7 @@ function loadConsumed() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ name: item.name, quantity: qtyInt })
             });
-            loadConsumed(); // refresh
+            loadConsumed(sortBy); // refresh
           }
         };
 
@@ -176,7 +218,7 @@ function loadConsumed() {
 }
 
 
-async function checkExpiring() {
+async function checkExpiring(sortBy = 'expiry') {
   const days = document.getElementById('daysToExpire').value;
   const res = await fetch(`./expiring/${days}`);
   const data = await res.json();
@@ -188,6 +230,27 @@ async function checkExpiring() {
     list.innerHTML = '<li>No items expiring soon.</li>';
     return;
   }
+
+  // Add sort buttons
+  const sortDiv = document.createElement('div');
+  sortDiv.style.marginBottom = '10px';
+  sortDiv.innerHTML = `
+    <button id="sortExpiringByName">Sort by Name</button>
+    <button id="sortExpiringByExpiry">Sort by Expiry Date</button>
+  `;
+  list.appendChild(sortDiv);
+
+  document.getElementById('sortExpiringByName').onclick = () => checkExpiring('name');
+  document.getElementById('sortExpiringByExpiry').onclick = () => checkExpiring('expiry');
+
+  // Sort items
+  data.sort((a, b) => {
+    if (sortBy === 'expiry') {
+      return new Date(a.expiry) - new Date(b.expiry);
+    } else {
+      return a.name.localeCompare(b.name);
+    }
+  });
 
   const table = document.createElement('table');
   table.innerHTML = `
@@ -222,7 +285,7 @@ async function checkExpiring() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
         });
-        checkExpiring(); // refresh the list
+        checkExpiring(sortBy); // refresh the list
       }
     };
     buttonCell.appendChild(button);
