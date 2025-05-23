@@ -19,12 +19,11 @@ async function addItem() {
   const quantity = document.getElementById('quantity').value;
   const expiry = document.getElementById('expiry').value;
   
-  /*
+  // Check that all fields are filled
   if (!name || !quantity || !expiry) {
     alert("Please fill out all fields.");
     return;
   }
-*/
 
   await fetch(`./add-item`, {
     method: 'POST',
@@ -32,22 +31,16 @@ async function addItem() {
     body: JSON.stringify({ name, quantity, expiry })
   });
 
-  // if (res.ok) {
-    // Add the item to the screen
-    const kitchenList = document.getElementById('kitchenList');
-    const div = document.createElement('div');
-    div.textContent = `✅ ${name} - ${quantity}`;
-    kitchenList.prepend(div); 
+  // Refresh the kitchen list
+  loadKitchen();
 
-    // Reset fields
-    document.getElementById('itemName').value = '';
-    document.getElementById('quantity').value = '';
-    document.getElementById('expiry').value = '';
+  // Reset fields
+  document.getElementById('itemName').value = '';
+  document.getElementById('quantity').value = '';
+  document.getElementById('expiry').value = '';
 
   alert('Item added!');
-  /*} else {
-    alert("Failed to add item.");
-  } */
+
 }
 
 async function loadKitchen() {
@@ -84,10 +77,10 @@ async function loadKitchen() {
     const expiryCell = document.createElement('td');
     expiryCell.textContent = formatDate(item.expiry);
 
-    const checkboxCell = document.createElement('td');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.onclick = async () => {
+    const buttonCell = document.createElement('td');
+    const button = document.createElement('button');
+    button.textContent = 'Consume';
+    button.onclick = async () => {
       const qty = prompt(`How much of "${item.name}" do you want to consume?`, 1);
       if (qty && parseInt(qty) > 0) {
         await fetch(`./consume-item`, {
@@ -96,16 +89,14 @@ async function loadKitchen() {
           body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
         });
         loadKitchen(); // Refresh after update
-      } else {
-        checkbox.checked = false; // Uncheck if invalid input
       }
     };
-    checkboxCell.appendChild(checkbox);
+    buttonCell.appendChild(button);
 
     row.appendChild(nameCell);
     row.appendChild(qtyCell);
     row.appendChild(expiryCell);
-    row.appendChild(checkboxCell);
+    row.appendChild(buttonCell);
     table.appendChild(row);
   });
 
@@ -149,11 +140,11 @@ function loadConsumed() {
         const expiryCell = document.createElement('td');
         expiryCell.textContent = formatDate(item.expiry);
 
-        const checkboxCell = document.createElement('td');
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
+        const buttonCell = document.createElement('td');
+        const button = document.createElement('button');
+        button.textContent = 'Return';
 
-        checkbox.onclick = async () => {
+        button.onclick = async () => {
           const qty = prompt(`How much of "${item.name}" do you want to return to kitchen?`, 1);
           const qtyInt = parseInt(qty);
           if (qtyInt > 0 && qtyInt <= item.consumed) {
@@ -163,18 +154,15 @@ function loadConsumed() {
               body: JSON.stringify({ name: item.name, quantity: qtyInt })
             });
             loadConsumed(); // refresh
-          } else {
-            alert('Invalid quantity.');
-            checkbox.checked = false;
           }
         };
 
-        checkboxCell.appendChild(checkbox);
+        buttonCell.appendChild(button);
 
         row.appendChild(nameCell);
         row.appendChild(qtyCell);
         row.appendChild(expiryCell);
-        row.appendChild(checkboxCell);
+        row.appendChild(buttonCell);
 
         table.appendChild(row);
       });
@@ -187,19 +175,6 @@ function loadConsumed() {
     });
 }
 
-/*
-async function loadConsumed() {
-  const res = await fetch(`./Items`);
-  const items = await res.json();
-  const list = document.getElementById('consumedList');
-  list.innerHTML = '';
-  items.filter(i => i.consumed > 0).forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = `${item.name} - ${item.consumed}`;
-    list.appendChild(li);
-  });
-}
-*/
 
 async function checkExpiring() {
   const days = document.getElementById('daysToExpire').value;
@@ -236,10 +211,10 @@ async function checkExpiring() {
     const expiryCell = document.createElement('td');
     expiryCell.textContent = formatDate(item.expiry);
 
-    const checkboxCell = document.createElement('td');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.onclick = async () => {
+    const buttonCell = document.createElement('td');
+    const button = document.createElement('button');
+    button.textContent = 'Consume';
+    button.onclick = async () => {
       const qty = prompt(`How much of "${item.name}" do you want to consume?`, 1);
       if (qty && parseInt(qty) > 0) {
         await fetch(`./consume-item`, {
@@ -248,16 +223,14 @@ async function checkExpiring() {
           body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
         });
         checkExpiring(); // refresh the list
-      } else {
-        checkbox.checked = false; // uncheck if invalid input
       }
     };
-    checkboxCell.appendChild(checkbox);
+    buttonCell.appendChild(button);
 
     row.appendChild(nameCell);
     row.appendChild(qtyCell);
     row.appendChild(expiryCell);
-    row.appendChild(checkboxCell);
+    row.appendChild(buttonCell);
 
     table.appendChild(row);
   });
