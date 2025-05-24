@@ -99,7 +99,9 @@ async function loadKitchen(sortBy = 'name') {
     expiryCell.textContent = formatDate(item.expiry);
 
     const actionCell = document.createElement('td');
-    actionCell.className = 'action-btns';
+    const btnContainer = document.createElement('div');
+    btnContainer.className = 'action-btns';
+    //actionCell.className = 'action-btns';
 
     // Consume Button
     const consumeBtn = document.createElement('button');
@@ -123,7 +125,7 @@ async function loadKitchen(sortBy = 'name') {
         loadKitchen(sortBy);
       }
     };
-    actionCell.appendChild(consumeBtn);
+    btnContainer.appendChild(consumeBtn);
 
     // Throw Away Button
     const throwBtn = document.createElement('button');
@@ -146,7 +148,7 @@ async function loadKitchen(sortBy = 'name') {
         loadKitchen(sortBy);
       }
     };
-    actionCell.appendChild(throwBtn);
+    btnContainer.appendChild(throwBtn);
 
     // Delete Button
     const deleteBtn = document.createElement('button');
@@ -161,7 +163,9 @@ async function loadKitchen(sortBy = 'name') {
         loadKitchen(sortBy);
       }
     };
-    actionCell.appendChild(deleteBtn);
+    btnContainer.appendChild(deleteBtn);
+    
+    actionCell.appendChild(btnContainer);
 
     row.appendChild(nameCell);
     row.appendChild(qtyCell);
@@ -380,7 +384,8 @@ async function checkExpiring(sortBy = 'name') {
   const list = document.getElementById('expiringList');
   list.innerHTML = '';
 
-  if (data.length === 0) {
+  const activeItems = data.filter(i => i.quantity > 0);
+  if (activeItems.length === 0) {
     list.innerHTML = '<li>No items expiring soon.</li>';
     return;
   }
@@ -398,7 +403,7 @@ async function checkExpiring(sortBy = 'name') {
   document.getElementById('sortExpiringByExpiry').onclick = () => checkExpiring('expiry');
 
   // Sort items
-  data.sort((a, b) => {
+  activeItems.sort((a, b) => {
     if (sortBy === 'expiry') {
       return new Date(a.expiry) - new Date(b.expiry);
     } else {
@@ -416,7 +421,7 @@ async function checkExpiring(sortBy = 'name') {
     </tr>
   `;
 
-  data.forEach(item => {
+  activeItems.forEach(item => {
     const row = document.createElement('tr');
 
     const nameCell = document.createElement('td');

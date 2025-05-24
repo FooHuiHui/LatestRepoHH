@@ -102,6 +102,10 @@ button {
   margin-right: 6px;
 }
 
+.action-btns {
+  display: flex;
+  gap: 6px;
+}
 
 /* Responsive */
 /* @media (max-width: 600px) {
