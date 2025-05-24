@@ -218,7 +218,7 @@ function loadConsumed(sortBy = 'name') {
 }
 
 
-async function checkExpiring(sortBy = 'expiry') {
+async function checkExpiring(sortBy = 'name') {
   const days = document.getElementById('daysToExpire').value;
   const res = await fetch(`./expiring/${days}`);
   const data = await res.json();
