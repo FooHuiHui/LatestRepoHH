@@ -11,6 +11,7 @@ function showSection(sectionId) {
   // Call relevant loader
   if (sectionId === 'kitchen') loadKitchen();
   else if (sectionId === 'consumed') loadConsumed();
+  else if (sectionId === 'thrown') loadThrown();
   else if (sectionId === 'expiring') checkExpiring();
 }
 
@@ -40,7 +41,6 @@ async function addItem() {
   document.getElementById('expiry').value = '';
 
   alert('Item added!');
-
 }
 
 async function loadKitchen(sortBy = 'name') {
@@ -82,7 +82,7 @@ async function loadKitchen(sortBy = 'name') {
       <th>Item</th>
       <th>Quantity Left</th>
       <th>Expiry Date</th>
-      <th>Consumed?</th>
+      <th>Actions</th>
     </tr>
   `;
 
@@ -98,26 +98,75 @@ async function loadKitchen(sortBy = 'name') {
     const expiryCell = document.createElement('td');
     expiryCell.textContent = formatDate(item.expiry);
 
-    const buttonCell = document.createElement('td');
-    const button = document.createElement('button');
-    button.textContent = 'Consume';
-    button.onclick = async () => {
+    const actionCell = document.createElement('td');
+    actionCell.className = 'action-btns';
+
+    // Consume Button
+    const consumeBtn = document.createElement('button');
+    consumeBtn.textContent = 'Consume';
+    consumeBtn.onclick = async () => {
       const qty = prompt(`How much of "${item.name}" do you want to consume?`, 1);
       if (qty && parseInt(qty) > 0) {
-        await fetch(`./consume-item`, {
+        const res = await fetch(`./consume-item`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
+          body: JSON.stringify({ id: item.id, quantity: parseInt(qty) })
         });
-        loadKitchen(sortBy); // Refresh after update
+
+          if (!res.ok) {
+            const msg = await res.text();
+            alert(msg); // <-- This will show the server's message to the user
+            return;
+          }
+
+        // Success: refresh or update UI as needed
+        loadKitchen(sortBy);
       }
     };
-    buttonCell.appendChild(button);
+    actionCell.appendChild(consumeBtn);
+
+    // Throw Away Button
+    const throwBtn = document.createElement('button');
+    throwBtn.textContent = 'Throw Away';
+    throwBtn.onclick = async () => {
+      const qty = prompt(`How much of "${item.name}" do you want to throw away?`, 1);
+      if (qty && parseInt(qty) > 0) {
+        const res = await fetch(`./throw-item`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: item.id, quantity: parseInt(qty) })
+        });
+
+        if (!res.ok) {
+          const msg = await res.text();
+          alert(msg); // Show backend error to user
+          return;
+        }
+
+        loadKitchen(sortBy);
+      }
+    };
+    actionCell.appendChild(throwBtn);
+
+    // Delete Button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = async () => {
+      if (confirm(`Delete "${item.name}" from Kitchen list? This cannot be undone.`)) {
+        await fetch(`./delete-item`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: item.id })
+        });
+        loadKitchen(sortBy);
+      }
+    };
+    actionCell.appendChild(deleteBtn);
 
     row.appendChild(nameCell);
     row.appendChild(qtyCell);
     row.appendChild(expiryCell);
-    row.appendChild(buttonCell);
+    row.appendChild(actionCell);
     table.appendChild(row);
   });
 
@@ -190,11 +239,17 @@ function loadConsumed(sortBy = 'name') {
           const qty = prompt(`How much of "${item.name}" do you want to return to kitchen?`, 1);
           const qtyInt = parseInt(qty);
           if (qtyInt > 0 && qtyInt <= item.consumed) {
-            await fetch('/return-item', {
+            const res = await fetch('/return-item', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name: item.name, quantity: qtyInt })
+              body: JSON.stringify({ id: item.id, quantity: qtyInt })
             });
+
+            if (!res.ok) {
+              const msg = await res.text();
+              alert(msg); // Show backend error to user
+              return;
+            }
             loadConsumed(sortBy); // refresh
           }
         };
@@ -217,6 +272,105 @@ function loadConsumed(sortBy = 'name') {
     });
 }
 
+function loadThrown(sortBy = 'name') {
+  const thrownList = document.getElementById('thrownList');
+  thrownList.innerHTML = 'Loading...';
+
+  fetch('/items')
+    .then(res => res.json())
+    .then(data => {
+      thrownList.innerHTML = '';
+
+      const thrownItems = data.filter(item => item.thrown > 0);
+      if (thrownItems.length === 0) {
+        thrownList.textContent = 'No items thrown away yet.';
+        return;
+      }
+
+      // Sort buttons
+      const sortDiv = document.createElement('div');
+      sortDiv.style.marginBottom = '10px';
+      sortDiv.innerHTML = `
+        <button id="sortThrownByName">Sort by Name</button>
+        <button id="sortThrownByExpiry">Sort by Expiry Date</button>
+      `;
+      thrownList.appendChild(sortDiv);
+
+      document.getElementById('sortThrownByName').onclick = () => loadThrown('name');
+      document.getElementById('sortThrownByExpiry').onclick = () => loadThrown('expiry');
+
+      // Sort items
+      thrownItems.sort((a, b) => {
+        if (sortBy === 'expiry') {
+          return new Date(a.expiry) - new Date(b.expiry);
+        } else {
+          return a.name.localeCompare(b.name);
+        }
+      });
+
+      const table = document.createElement('table');
+      table.innerHTML = `
+        <tr>
+          <th>Item</th>
+          <th>Thrown Quantity</th>
+          <th>Expiry Date</th>
+        </tr>
+      `;
+
+      thrownItems.forEach(item => {
+        const row = document.createElement('tr');
+
+        const nameCell = document.createElement('td');
+        nameCell.textContent = item.name;
+
+        const qtyCell = document.createElement('td');
+        qtyCell.textContent = item.thrown;
+
+        const expiryCell = document.createElement('td');
+        expiryCell.textContent = formatDate(item.expiry);
+
+        /*
+        const buttonCell = document.createElement('td');
+        const button = document.createElement('button');
+        button.textContent = 'Return';
+
+        button.onclick = async () => {
+          const qty = prompt(`How much of "${item.name}" do you want to return to kitchen?`, 1);
+          const qtyInt = parseInt(qty);
+          if (qtyInt > 0 && qtyInt <= item.consumed) {
+            const res = await fetch('/return-item', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: item.id, quantity: qtyInt })
+            });
+
+            if (!res.ok) {
+              const msg = await res.text();
+              alert(msg); // Show backend error to user
+              return;
+            }
+            loadConsumed(sortBy); // refresh
+          }
+        };
+
+        buttonCell.appendChild(button);
+        */
+
+        row.appendChild(nameCell);
+        row.appendChild(qtyCell);
+        row.appendChild(expiryCell);
+      //  row.appendChild(buttonCell);
+
+        table.appendChild(row);
+      });
+
+      thrownList.appendChild(table);
+    })
+    .catch(err => {
+      console.error('Error loading thrown items:', err);
+      thrownList.textContent = 'Failed to load thrown items.';
+    });
+}
 
 async function checkExpiring(sortBy = 'name') {
   const days = document.getElementById('daysToExpire').value;
@@ -274,26 +428,58 @@ async function checkExpiring(sortBy = 'name') {
     const expiryCell = document.createElement('td');
     expiryCell.textContent = formatDate(item.expiry);
 
-    const buttonCell = document.createElement('td');
-    const button = document.createElement('button');
-    button.textContent = 'Consume';
-    button.onclick = async () => {
+    // Consume button
+    const consumeBtn = document.createElement('button');
+    consumeBtn.textContent = 'Consume';
+    consumeBtn.onclick = async () => {
       const qty = prompt(`How much of "${item.name}" do you want to consume?`, 1);
       if (qty && parseInt(qty) > 0) {
-        await fetch(`./consume-item`, {
+        const res = await fetch(`./consume-item`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: item.name, quantity: parseInt(qty) })
+          body: JSON.stringify({ id: item.id, quantity: parseInt(qty) })
         });
+
+        if (!res.ok) {
+          const msg = await res.text();
+          alert(msg); // Show backend error to user
+          return;
+        }
+
         checkExpiring(sortBy); // refresh the list
       }
     };
-    buttonCell.appendChild(button);
+
+    // Throw Away Button
+    const throwBtn = document.createElement('button');
+    throwBtn.textContent = 'Throw Away';
+    throwBtn.onclick = async () => {
+      const qty = prompt(`How much of "${item.name}" do you want to throw away?`, 1);
+      if (qty && parseInt(qty) > 0) {
+        const res = await fetch(`./throw-item`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: item.id, quantity: parseInt(qty) })
+        });
+
+        if (!res.ok) {
+          const msg = await res.text();
+          alert(msg); // Show backend error to user
+          return;
+        }
+        checkExpiring(sortBy); // refresh the list
+      }
+    };
+    
+    // Create action cell and append both buttons
+    const actionCell = document.createElement('td');
+    actionCell.appendChild(consumeBtn);
+    actionCell.appendChild(throwBtn);
 
     row.appendChild(nameCell);
     row.appendChild(qtyCell);
     row.appendChild(expiryCell);
-    row.appendChild(buttonCell);
+    row.appendChild(actionCell);
 
     table.appendChild(row);
   });
@@ -310,16 +496,22 @@ function formatDate(isoString) {
 }
 
 /*
-async function consumeItem() {
-  const name = document.getElementById('consumeName').value;
-  const quantity = document.getElementById('consumeQuantity').value;
-  await fetch(`./consume-item`, {
+// For consume action
+async function consumeItem(id, quantity) {
+  const res = await fetch('./consume-item', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ name, quantity })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, quantity })
   });
-  alert('Item consumed!');
+
+  if (!res.ok) {
+    const msg = await res.text();
+    alert(msg); // <-- This will show the server's message to the user
+    return;
+  }
+
+  // Success: refresh or update UI as needed
+  loadKitchen();
 }
 */
-
 

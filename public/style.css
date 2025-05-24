@@ -98,6 +98,11 @@ button {
   margin-top: 10px;
 }
 
+.action-btns button {
+  margin-right: 6px;
+}
+
+
 /* Responsive */
 /* @media (max-width: 600px) {
   .navbar {

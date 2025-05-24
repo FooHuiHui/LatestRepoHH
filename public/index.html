@@ -24,6 +24,7 @@
     <button onclick="showSection('add')">Add</button>
     <button onclick="showSection('kitchen')">Kitchen</button>
     <button onclick="showSection('consumed')">Consumed</button>
+    <button onclick="showSection('thrown')">Thrown</button>
     <button onclick="showSection('expiring')">Expiring</button>
   </nav>
 
@@ -49,6 +50,11 @@
       <div id="consumedList"></div>
     </section>
 
+    <section id="thrown" class="tab" style="display:none;">
+      <h2>Items Thrown Away</h2>
+      <div id="thrownList"></div>
+    </section>
+      
     <section id="expiring" class="tab" style="display:none;">
       <h2>Items Expiring Soon</h2>
       <label for="daysToExpire">Check items expiring in</label>
