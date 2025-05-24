@@ -1,4 +1,21 @@
 /* Base */
+.logo-header {
+  display: flex;
+  justify-content: flex-start;  /* Align left */
+  align-items: center;
+  padding: 1.2rem 0 0.5rem 1.5rem; /* Add left padding */
+  background: none;
+}
+
+.logo-title {
+  font-size: 1.5rem;             /* Smaller size */
+  font-weight: 600;              /* Sleeker weight */
+  color: #2c3e50;
+  letter-spacing: 1px;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif; /* Sleek font */
+  text-shadow: none;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   margin: 0;
